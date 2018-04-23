@@ -1,0 +1,43 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_blacklist_user_delete`(
+IN p_userId binary(16)
+)
+BEGIN
+ DELETE FROM `blacklist_user` WHERE UserId = p_userId;
+END
+
+----------------------------
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_blacklist_user_get`(
+IN p_UserId binary(16))
+BEGIN
+
+select FullName, PhoneNumber, ImageName, FbUrl, Salary,  Reason from blacklist_user where UserId = p_UserId;
+
+END
+
+-----------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_blacklist_user_save`(
+IN p_UserId binary(16),
+IN p_FullName varchar(20),
+IN p_ImageName varchar(128),
+IN p_Salary double,
+IN p_FbUrl varchar(255),
+IN p_PhoneNumber varchar(13),
+IN p_Reason varchar(255))
+BEGIN
+	if exists (select UserId from blacklist_user where UserId = p_UserId)
+then 
+	update blacklist_user set FullName = COALESCE(p_FullName, FullName),
+					p_ImageName = COALESCE(p_ImageName,ImageName), 
+                    Salary = COALESCE(p_Salary,Salary),
+					FbUrl = COALESCE(p_FbUrl,FbUrl), 
+                    PhoneNumber = COALESCE(p_PhoneNumber,PhoneNumber), 
+                    Reason = COALESCE(p_Reason,Reason)
+				where UserId = p_UserId;
+else 
+	insert into user(UserId, FullName, Age, Salary, FbUrl, PhoneNumber, Reason)
+    values (p_UserId,p_FullName, p_Age, p_Salary, p_FbUrl, p_PhoneNumber, p_Reason);
+    end if;
+END
